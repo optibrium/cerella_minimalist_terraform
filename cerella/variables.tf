@@ -20,6 +20,10 @@ variable "prometheus-version" {
   default = "19.2.3"
 }
 
+variable "cerella-version" {
+  default = "1.0.25"
+}
+
 variable "cluster-ingress-port" {
   default = "30443"
   type    = string

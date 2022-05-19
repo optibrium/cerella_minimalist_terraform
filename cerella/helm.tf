@@ -165,3 +165,21 @@ resource "kubernetes_secret" "green-docker-logins" {
 
   type = "kubernetes.io/dockerconfigjson"
 }
+
+resource "helm_release" "cerella_blue" {
+  name       = "blue"
+  repository = "https://helm.cerella.ai"
+  chart      = "cerella_blue"
+  version    = var.cerella-version
+  depends_on = [aws_eks_cluster.environment]
+}
+
+
+resource "helm_release" "cerella_green" {
+  name       = "green"
+  repository = "https://helm.cerella.ai"
+  chart      = "cerella_green"
+  version    = var.cerella-version
+  depends_on = [aws_eks_cluster.environment]
+}
+
