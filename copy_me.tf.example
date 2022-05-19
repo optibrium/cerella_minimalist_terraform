@@ -1,0 +1,40 @@
+#
+# @author GDev
+# @date May 2022
+#
+# You might wish to create a backend of the form
+#
+# terraform {
+#   backend "s3" {
+#     bucket  = "<Your S3 terraform backend bucket>"
+#     key     = "terraform/cerella.tfstate"
+#     profile = "<Your AWS profile name>"
+#     region  = "eu-west-1"
+#   }
+# }
+
+provider "aws" {
+  profile = "<Your AWS profile name>"
+  region  = "eu-west-1"
+}
+
+module "cerella" {
+
+  source             = ".cerella"
+  hosted-zone-id     = "<Your Hosted Zone ID>"
+  domain             = "<Your DNS domain>"
+  cluster-name       = "<Your Cluster Name>"
+  security-group-id  = "<Your pre-created SG id>"
+  vpc-id             = "<Your pre-created VPC id>"
+  subnets            = ["your", "vpc", "subnets"]
+  acm-certificate-arn = "<Your ACM certificate ARN>"
+  alb-privacy         = "<Is the ALB internal only>"
+
+  registry_username  = "<Your Dockerhub Username>"
+  registry_password  = "<Your Dockerhub Password>"
+}
+
+
+output "how_to_get_kubectl" {
+  value = module.cerella.how_to_get_kubectl
+}
