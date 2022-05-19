@@ -18,7 +18,7 @@ provider "aws" {
   region  = "eu-west-1"
 }
 
-module "cerella" {
+module "cerella_minimalist" {
 
   source             = ".cerella"
   hosted-zone-id     = "<Your Hosted Zone ID>"
@@ -35,6 +35,6 @@ module "cerella" {
 }
 
 
-output "how_to_get_kubectl" {
-  value = module.cerella.how_to_get_kubectl
+output "cerella_minimalist_output" {
+  value = module.cerella_minimalist.cerella_minimalist_output
 }
