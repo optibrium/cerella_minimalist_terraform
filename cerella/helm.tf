@@ -172,6 +172,11 @@ resource "helm_release" "cerella_blue" {
   chart      = "cerella_blue"
   version    = var.cerella-version
   depends_on = [aws_eks_cluster.environment]
+  
+  set {
+    name = "domain"
+    value = var.domain
+  }
 }
 
 
@@ -181,5 +186,10 @@ resource "helm_release" "cerella_green" {
   chart      = "cerella_green"
   version    = var.cerella-version
   depends_on = [aws_eks_cluster.environment]
+  
+  set {
+    name = "domain"
+    value = var.domain
+  }
 }
 
