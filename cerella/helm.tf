@@ -192,9 +192,3 @@ resource "helm_release" "cerella_green" {
     value = var.domain
   }
 }
-
-  set {
-    name  = "domain"
-    value = var.domain
-  }
-}
