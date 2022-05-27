@@ -20,18 +20,16 @@ provider "aws" {
 
 module "cerella_minimalist" {
 
-  source             = ".cerella"
-  hosted-zone-id     = "<Your Hosted Zone ID>"
-  domain             = "<Your DNS domain>"
-  cluster-name       = "<Your Cluster Name>"
-  security-group-id  = "<Your pre-created SG id>"
-  vpc-id             = "<Your pre-created VPC id>"
-  subnets            = ["your", "vpc", "subnets"]
+  source              = "./cerella"
+  domain              = "<Your DNS domain>"
+  cluster-name        = "<Your Cluster Name>"
+  vpc-id              = "<Your pre-created VPC id>"
+  subnets             = ["your", "vpc", "subnets"]
   acm-certificate-arn = "<Your ACM certificate ARN>"
   alb-privacy         = "<Is the ALB internal only>"
-
-  registry_username  = "<Your Dockerhub Username>"
-  registry_password  = "<Your Dockerhub Password>"
+  ingress-cidr        = ["Your Office IP range"]
+  registry_username   = "<Your Dockerhub Username>"
+  registry_password   = "<Your Dockerhub Password>"
 }
 
 

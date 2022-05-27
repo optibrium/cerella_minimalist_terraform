@@ -9,7 +9,7 @@ variable "eks-instance-type" {
 }
 
 variable "eks-instance-count" {
-  default = 3
+  default = 4
 }
 
 variable "ingress-version" {
@@ -44,9 +44,6 @@ variable "eks-ami" {
   type    = string
 }
 
-variable "security-group-id" {
-}
-
 variable "subnets" {
   type = list(any)
 }
@@ -72,4 +69,7 @@ variable "domain" {
 
 variable "alb-privacy" {
   default = true
+}
+variable "ingress-cidr" {
+  type = list(string)
 }

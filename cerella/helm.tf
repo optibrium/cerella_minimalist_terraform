@@ -16,7 +16,7 @@ resource "helm_release" "ingress" {
   repository = "https://helm.nginx.com/stable"
   chart      = "nginx-ingress"
   version    = var.ingress-version
-  depends_on = [aws_eks_cluster.environment]
+  depends_on = [aws_autoscaling_group.workers]
 
   set {
     name  = "controller.replicaCount"
@@ -79,7 +79,7 @@ resource "helm_release" "prometheus" {
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
   version    = var.prometheus-version
-  depends_on = [aws_eks_cluster.environment]
+  depends_on = [aws_autoscaling_group.workers]
 }
 
 resource "kubernetes_namespace" "blue" {
@@ -172,7 +172,7 @@ resource "helm_release" "cerella_blue" {
   chart      = "cerella_blue"
   version    = var.cerella-version
   depends_on = [aws_eks_cluster.environment]
-  
+
   set {
     name = "domain"
     value = var.domain
@@ -186,10 +186,15 @@ resource "helm_release" "cerella_green" {
   chart      = "cerella_green"
   version    = var.cerella-version
   depends_on = [aws_eks_cluster.environment]
-  
+
   set {
     name = "domain"
     value = var.domain
   }
 }
 
+  set {
+    name  = "domain"
+    value = var.domain
+  }
+}

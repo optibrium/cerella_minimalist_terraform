@@ -9,7 +9,7 @@ resource "aws_eks_cluster" "environment" {
   version  = var.eks-version
 
   vpc_config {
-    security_group_ids = [var.security-group-id]
+    security_group_ids = [aws_security_group.control_plane.id]
     subnet_ids         = var.subnets
   }
 }
@@ -21,7 +21,7 @@ resource "aws_launch_configuration" "workers" {
   instance_type               = var.eks-instance-type
   key_name                    = "cerella-${var.cluster-name}"
   name_prefix                 = "eks_workers"
-  security_groups             = [var.security-group-id]
+  security_groups             = [aws_security_group.worker_nodes.id]
   user_data                   = local.eks_worker_userdata
 
   lifecycle {
@@ -39,7 +39,7 @@ resource "aws_autoscaling_group" "workers" {
   health_check_grace_period = 300
   launch_configuration      = aws_launch_configuration.workers.id
   max_size                  = 7
-  min_size                  = 3
+  min_size                  = 4
   name                      = "worker_nodes-${var.cluster-name}"
   vpc_zone_identifier       = var.subnets
 
@@ -58,6 +58,7 @@ resource "aws_autoscaling_group" "workers" {
   lifecycle {
     ignore_changes = [load_balancers, target_group_arns]
   }
+  depends_on = [aws_eks_cluster.environment]
 }
 
 data "aws_eks_cluster_auth" "environment_auth" {
