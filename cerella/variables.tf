@@ -21,7 +21,7 @@ variable "prometheus-version" {
 }
 
 variable "cerella-version" {
-  default = "1.0.25"
+  default = "1.0.29"
 }
 
 variable "cluster-ingress-port" {
