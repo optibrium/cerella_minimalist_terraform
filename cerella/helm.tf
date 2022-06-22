@@ -24,6 +24,11 @@ resource "helm_release" "ingress" {
   }
 
   set {
+    name  = "controller.healthStatus"
+    value = "true"
+  }
+
+  set {
     name  = "controller.kind"
     value = "daemonset"
   }
