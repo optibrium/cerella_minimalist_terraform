@@ -32,6 +32,13 @@ resource "aws_alb_target_group" "workers" {
   port     = var.cluster-ingress-port
   protocol = "HTTP"
   vpc_id   = var.vpc-id
+  health_check {
+    enabled = true
+    healthy_threshold = 4
+    interval = 30
+    matcher = "200"
+    path = "/nginx-health"
+  }
 }
 
 resource "aws_autoscaling_attachment" "workers" {
