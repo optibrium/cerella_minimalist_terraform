@@ -54,6 +54,10 @@ variable "acm-certificate-arn" {
 variable "vpc-id" {
 }
 
+variable "cluster-autoscaler-version" {
+  default = "v1.20.0"
+}
+
 variable "cluster-name" {
 }
 
