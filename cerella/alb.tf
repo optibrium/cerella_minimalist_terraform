@@ -33,11 +33,11 @@ resource "aws_alb_target_group" "workers" {
   protocol = "HTTP"
   vpc_id   = var.vpc-id
   health_check {
-    enabled = true
+    enabled           = true
     healthy_threshold = 4
-    interval = 30
-    matcher = "200"
-    path = "/nginx-health"
+    interval          = 30
+    matcher           = "200"
+    path              = "/nginx-health"
   }
 }
 
