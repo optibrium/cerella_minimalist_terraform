@@ -83,8 +83,38 @@ resource "helm_release" "prometheus" {
   name       = "prometheus"
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "kube-prometheus-stack"
-  version    = var.prometheus-version
+  version    = var.prometheus-chart-version
   depends_on = [aws_autoscaling_group.workers]
+
+  set {
+    name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.storageClassName"
+    value = "gp2"
+  }
+  set {
+    name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.accessModes[0]"
+    value = "ReadWriteOnce"
+  }
+
+  set {
+    name  = "prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage"
+    value = "20Gi"
+  }
+
+  set {
+    name  = "prometheus.prometheusSpec.podMetadata.annotations.cluster-autoscaler\\.kubernetes\\.io/safe-to-evict"
+    value = "\"true\""
+  }
+
+  set {
+    name  = "alertmanager.enabled"
+    value = false
+  }
+
+  set {
+    name  = "grafana.podAnnotations.cluster-autoscaler\\.kubernetes\\.io/safe-to-evict"
+    value = "\"true\""
+  }
+
 }
 
 resource "helm_release" "cluster_autoscaler" {
@@ -157,13 +187,13 @@ resource "kubernetes_secret" "blue-docker-logins" {
 resource "kubernetes_namespace" "green" {
   metadata {
     annotations = {
-      name = "green"
+      name                             = "green"
       "meta.helm.sh/release-name"      = "green"
       "meta.helm.sh/release-namespace" = "default"
     }
 
     labels = {
-      purpose = "green"
+      purpose                        = "green"
       "app.kubernetes.io/managed-by" = "Helm"
     }
 
@@ -199,6 +229,19 @@ resource "kubernetes_secret" "green-docker-logins" {
   type = "kubernetes.io/dockerconfigjson"
 }
 
+resource "helm_release" "external_secrets" {
+  name       = "external-secrets"
+  repository = "https://charts.external-secrets.io"
+  chart      = "external-secrets"
+  depends_on = [aws_eks_cluster.environment]
+  namespace  = "kube-system"
+
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.irsa.name}"
+  }
+}
+
 resource "helm_release" "cerella_blue" {
   name       = "blue"
   repository = "https://helm.cerella.ai"
@@ -207,7 +250,7 @@ resource "helm_release" "cerella_blue" {
   depends_on = [aws_eks_cluster.environment]
 
   set {
-    name = "domain"
+    name  = "domain"
     value = var.domain
   }
 }
@@ -221,7 +264,7 @@ resource "helm_release" "cerella_green" {
   depends_on = [aws_eks_cluster.environment]
 
   set {
-    name = "domain"
+    name  = "domain"
     value = var.domain
   }
 }

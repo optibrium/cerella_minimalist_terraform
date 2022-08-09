@@ -83,6 +83,8 @@ provider "kubernetes" {
   token                  = data.aws_eks_cluster_auth.environment_auth.token
 }
 
+data "aws_caller_identity" "current" {}
+
 resource "kubernetes_config_map" "aws_auth_configmap" {
   metadata {
     name      = "aws-auth"
@@ -117,3 +119,31 @@ set -o xtrace
   '${var.cluster-name}'
 USERDATA
 }
+
+data "tls_certificate" "environment" {
+  url        = aws_eks_cluster.environment.identity.0.oidc.0.issuer
+  depends_on = [aws_eks_cluster.environment]
+}
+resource "aws_iam_openid_connect_provider" "oidc_identity_provider" {
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.environment.certificates.0.sha1_fingerprint]
+  url             = aws_eks_cluster.environment.identity.0.oidc.0.issuer
+  depends_on      = [aws_eks_cluster.environment]
+}
+
+locals {
+  provider_url = replace(flatten(concat(aws_eks_cluster.environment[*].identity[*].oidc.0.issuer, [""]))[0], "https://", "")
+  depends_on   = [aws_iam_openid_connect_provider.oidc_identity_provider]
+}
+
+# resource "kubernetes_storage_class" "gp2" {
+#   metadata {
+#     name = "gp2"
+#   }
+#   storage_provisioner = "kubernetes.io/aws-ebs"
+#   reclaim_policy      = "Delete"
+#   parameters = {
+#     type = "gp2"
+#   }
+#   depends_on = [aws_eks_cluster.environment]
+# }

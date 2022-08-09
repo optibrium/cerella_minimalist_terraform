@@ -3,25 +3,19 @@
 # @date May 2022
 #
 
-variable "eks-instance-type" {
-  default = "t2.large"
-  type    = string
+variable "acm-certificate-arn" {
 }
 
-variable "eks-instance-count" {
-  default = 4
-}
-
-variable "ingress-version" {
-  default = "0.11.3"
-}
-
-variable "prometheus-version" {
-  default = "19.2.3"
+variable "alb-privacy" {
+  default = true
 }
 
 variable "cerella-version" {
-  default = "1.0.29"
+  default = "1.0.34"
+}
+
+variable "cluster-autoscaler-version" {
+  default = "v1.22.0"
 }
 
 variable "cluster-ingress-port" {
@@ -29,14 +23,12 @@ variable "cluster-ingress-port" {
   type    = string
 }
 
-variable "region" {
-  default = "eu-west-1"
-  type    = string
+variable "cluster-name" {
+  type = string
 }
 
-variable "eks-version" {
-  default = "1.20"
-  type    = string
+variable "domain" {
+  type = string
 }
 
 variable "eks-ami" {
@@ -44,36 +36,61 @@ variable "eks-ami" {
   type    = string
 }
 
-variable "subnets" {
-  type = list(any)
+variable "eks-instance-count" {
+  default = 4
 }
 
-variable "acm-certificate-arn" {
+variable "eks-instance-type" {
+  default = "t2.large"
+  type    = string
 }
 
-variable "vpc-id" {
+variable "eks-version" {
+  default = "1.22"
+  type    = string
 }
 
-variable "cluster-autoscaler-version" {
-  default = "v1.20.0"
+variable "ingress-cidr" {
+  type = list(string)
 }
 
-variable "cluster-name" {
+variable "ingress-version" {
+  default = "0.11.3"
 }
 
-variable "registry_username" {
+variable "irsa_iam_role_name" {
+  default = "external-secrets-readonly"
+  type    = string
+}
+
+variable "prometheus-chart-version" {
+  default = "38.0.0"
+}
+
+variable "region" {
+  default = "us-west-2"
+  type    = string
 }
 
 variable "registry_password" {
 }
 
-variable "domain" {
-  type = string
+variable "registry_username" {
 }
 
-variable "alb-privacy" {
-  default = true
+variable "subnets" {
+  type = list(any)
 }
-variable "ingress-cidr" {
-  type = list(string)
+
+variable "vpc-id" {
+}
+
+variable "service-account-name" {
+  default = "external-secrets"
+  type    = string
+}
+
+variable "service-account-namespace" {
+  default = "kube-system"
+  type    = string
 }
