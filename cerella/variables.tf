@@ -37,7 +37,7 @@ variable "eks-ami" {
 }
 
 variable "eks-instance-count" {
-  default = 4
+  default = 6
 }
 
 variable "eks-instance-type" {
@@ -79,6 +79,14 @@ variable "registry_username" {
 }
 
 variable "subnets" {
+  type = list(any)
+}
+
+variable "asg_subnets" {
+  type = list(any)
+}
+
+variable "alb_subnets" {
   type = list(any)
 }
 
