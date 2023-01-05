@@ -121,7 +121,7 @@ resource "helm_release" "cluster_autoscaler" {
   name       = "autoscaler"
   repository = "https://kubernetes.github.io/autoscaler"
   chart      = "cluster-autoscaler"
-  depends_on = [aws_eks_cluster.environment]
+  depends_on = [aws_autoscaling_group.workers]
   namespace  = "kube-system"
   set {
     name  = "autoDiscovery.clusterName"
@@ -233,7 +233,7 @@ resource "helm_release" "external_secrets" {
   name       = "external-secrets"
   repository = "https://charts.external-secrets.io"
   chart      = "external-secrets"
-  depends_on = [aws_eks_cluster.environment]
+  depends_on = [aws_autoscaling_group.workers]
   namespace  = "kube-system"
 
   set {
@@ -247,11 +247,15 @@ resource "helm_release" "cerella_blue" {
   repository = "https://helm.cerella.ai"
   chart      = "cerella_blue"
   version    = var.cerella-version
-  depends_on = [aws_eks_cluster.environment]
+  depends_on = [aws_autoscaling_group.workers]
 
   set {
     name  = "domain"
     value = var.domain
+  }
+  set {
+    name  = "aws_region"
+    value = var.region
   }
 }
 
@@ -261,10 +265,14 @@ resource "helm_release" "cerella_green" {
   repository = "https://helm.cerella.ai"
   chart      = "cerella_green"
   version    = var.cerella-version
-  depends_on = [aws_eks_cluster.environment]
+  depends_on = [aws_autoscaling_group.workers]
 
   set {
     name  = "domain"
     value = var.domain
+  }
+  set {
+    name  = "aws_region"
+    value = var.region
   }
 }
