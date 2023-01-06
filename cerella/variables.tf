@@ -11,7 +11,7 @@ variable "alb-privacy" {
 }
 
 variable "cerella-version" {
-  default = "1.0.34"
+  default = "1.0.41"
 }
 
 variable "cluster-autoscaler-version" {
