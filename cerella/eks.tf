@@ -3,10 +3,17 @@
 # @date Feb 2022
 #
 
+resource "aws_ebs_encryption_by_default" "ebs_encryption" {
+  enabled = true
+}
+
 resource "aws_eks_cluster" "environment" {
   name     = var.cluster-name
   role_arn = aws_iam_role.control_plane.arn
   version  = var.eks-version
+  depends_on = [
+    aws_ebs_encryption_by_default.ebs_encryption
+  ]
 
   vpc_config {
     security_group_ids = [aws_security_group.control_plane.id]
@@ -14,10 +21,21 @@ resource "aws_eks_cluster" "environment" {
   }
 }
 
+data "aws_ami" "eks_ami" {
+
+  filter {
+    name   = "name"
+    values = ["amazon-eks-node-${var.eks-version}-v*"]
+  }
+
+  most_recent = true
+  owners      = ["amazon"]
+}
+
 resource "aws_launch_configuration" "workers" {
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.worker_nodes.name
-  image_id                    = var.eks-ami
+  image_id                    = data.aws_ami.eks_ami.image_id
   instance_type               = var.eks-instance-type
   key_name                    = "cerella-${var.cluster-name}"
   name_prefix                 = "eks_workers"
@@ -39,7 +57,7 @@ resource "aws_autoscaling_group" "workers" {
   health_check_grace_period = 300
   launch_configuration      = aws_launch_configuration.workers.id
   max_size                  = 7
-  min_size                  = 4
+  min_size                  = 0
   name                      = "worker_nodes-${var.cluster-name}"
   vpc_zone_identifier       = var.asg_subnets
 
@@ -136,14 +154,48 @@ locals {
   depends_on   = [aws_iam_openid_connect_provider.oidc_identity_provider]
 }
 
-# resource "kubernetes_storage_class" "gp2" {
-#   metadata {
-#     name = "gp2"
-#   }
-#   storage_provisioner = "kubernetes.io/aws-ebs"
-#   reclaim_policy      = "Delete"
-#   parameters = {
-#     type = "gp2"
-#   }
-#   depends_on = [aws_eks_cluster.environment]
-# }
+# Addon
+# Kube Proxy
+resource "aws_eks_addon" "kube_proxy" {
+  cluster_name      = aws_eks_cluster.environment.name
+  addon_name        = "kube-proxy"
+  addon_version     = var.kube_proxy_addon_version
+  resolve_conflicts = "OVERWRITE"
+  depends_on        = [aws_eks_cluster.environment]
+}
+
+# Kube Proxy
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name      = aws_eks_cluster.environment.name
+  addon_name        = "vpc-cni"
+  addon_version     = var.vpc_cni_addon_version
+  resolve_conflicts = "OVERWRITE"
+  depends_on        = [aws_eks_cluster.environment]
+}
+
+# Coredns
+resource "aws_eks_addon" "coredns" {
+  cluster_name      = aws_eks_cluster.environment.name
+  addon_name        = "coredns"
+  addon_version     = var.coredns_addon_version
+  resolve_conflicts = "OVERWRITE"
+  depends_on        = [aws_eks_cluster.environment]
+}
+
+module "eks_ingest_workers_asg" {
+  source                      = "./modules/eks_workers_asg"
+  cluster_name                = var.cluster-name
+  eks_subnet_ids              = var.subnets
+  eks_cluster_endpoint        = aws_eks_cluster.environment.endpoint
+  security_group_ids          = [aws_security_group.worker_nodes.id]
+  eks_cluster_ca_cert         = aws_eks_cluster.environment.certificate_authority.0.data
+  eks_cluster_region          = var.region
+  instance_type               = var.ingest-instance-type
+  disk_size                   = "100"
+  disk_type                   = "gp2"
+  apply_taints                = true
+  node_taints                 = { node = "ingest:NoSchedule" }
+  node_labels                 = { Type = "ingest" }
+  worker_iam_instance_profile = aws_iam_instance_profile.worker_nodes.name
+  desired_capacity            = var.ingest_node_desired_capacity
+}
